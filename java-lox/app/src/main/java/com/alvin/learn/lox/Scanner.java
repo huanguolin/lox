@@ -140,8 +140,9 @@ class Scanner {
         break;
       case '/':
         if (match('/')) {
-          // A comment goes until the end of the line.
-          while (peek() != '\n' && !isAtEnd()) advance();
+          oneLineComment();
+        } else if (match('*')) {
+          multiLineComment();
         } else {
           addToken(SLASH);
         }
@@ -253,5 +254,36 @@ class Scanner {
 
   private boolean isAlphaNumeric(char c) {
     return isAlpha(c) || isDigit(c);
+  }
+
+  private void oneLineComment() {
+    // A comment goes until the end of the line.
+    while (peek() != '\n' && !isAtEnd()) advance();
+  }
+
+  private void multiLineComment() {
+    // A multi-lines comment.
+    int stack = 1;
+    while (stack > 0) {
+      char cc = peek();
+      char cn = peekNext();
+
+      if (cc == '/' && cn == '*') {
+        stack++;
+        advance(); // Avoid /*/ do stack++ and stack--.
+      } else if (cc == '*' && cn == '/') {
+        stack--;
+        advance(); // Avoid /*/ do stack++ and stack--.
+      } else if (cc == '\n') {
+        line++;
+      }
+
+      if (isAtEnd()) {
+        Lox.error(line, "Unterminated multi-lines comment.");
+        return;
+      }
+
+      advance();
+    }
   }
 }
