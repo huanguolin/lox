@@ -1,4 +1,4 @@
-package com.alvin.learn.lox;
+package alvin.learn.lox;
 
 class Token {
   final TokenType type;
