@@ -8,7 +8,7 @@
             "type": "java8+",
             "request": "launch",
             "name": "Launch Java 8+ App",
-            "args": "./src/main/java/alvin/learn/lox",
+            // "args": "./src/main/java/alvin/learn/lox",
         },
         {
             "name": "Launch Java: Continuous Mode",
