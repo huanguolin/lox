@@ -1,6 +1,11 @@
 package alvin.learn.lox;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static alvin.learn.lox.TokenType.BANG;
 import static alvin.learn.lox.TokenType.BANG_EQUAL;
@@ -37,6 +42,22 @@ import static alvin.learn.lox.TokenType.WHILE;
 class Parser {
 
   private static class ParseError extends RuntimeException {}
+
+  private static final Set<TokenType> binarySet = Stream
+    .of(
+      COMMA, // commaExpr
+      BANG_EQUAL,
+      EQUAL_EQUAL, // equality
+      GREATER,
+      GREATER_EQUAL,
+      LESS,
+      LESS_EQUAL, // comparison
+      MINUS,
+      PLUS, // term
+      SLASH,
+      STAR // factor
+    )
+    .collect(Collectors.toCollection(HashSet::new));
 
   private final List<Token> tokens;
   private int current = 0;
@@ -157,6 +178,16 @@ class Parser {
       return new Expr.Grouping(expr);
     }
 
+    if (isBinaryOperator(peek())) {
+      Token op = peek();
+      if (match(COMMA)) equality();
+      if (match(EQUAL_EQUAL, BANG_EQUAL)) ternary();
+      if (match(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) term();
+      if (match(MINUS, PLUS)) factor();
+      if (match(SLASH, STAR)) unary();
+      throw error(op, "Binary operation require left expression.");
+    }
+
     throw error(peek(), "Expect expression.");
   }
 
@@ -169,6 +200,10 @@ class Parser {
   private ParseError error(Token token, String message) {
     Lox.error(token, message);
     return new ParseError();
+  }
+
+  private boolean isBinaryOperator(Token token) {
+    return binarySet.contains(token.type);
   }
 
   private void synchronize() {
@@ -194,19 +229,17 @@ class Parser {
   }
 
   private boolean match(TokenType... types) {
-    for (TokenType type : types) {
-      if (check(type)) {
-        advance();
-        return true;
-      }
+    if (check(types)) {
+      advance();
+      return true;
     }
 
     return false;
   }
 
-  private boolean check(TokenType type) {
+  private boolean check(TokenType... types) {
     if (isAtEnd()) return false;
-    return peek().type == type;
+    return Arrays.asList(types).contains(peek().type);
   }
 
   private Token advance() {
