@@ -5,6 +5,7 @@ import java.util.List;
 import static alvin.learn.lox.TokenType.BANG;
 import static alvin.learn.lox.TokenType.BANG_EQUAL;
 import static alvin.learn.lox.TokenType.CLASS;
+import static alvin.learn.lox.TokenType.COLON;
 import static alvin.learn.lox.TokenType.COMMA;
 import static alvin.learn.lox.TokenType.EOF;
 import static alvin.learn.lox.TokenType.EQUAL_EQUAL;
@@ -22,6 +23,7 @@ import static alvin.learn.lox.TokenType.NIL;
 import static alvin.learn.lox.TokenType.NUMBER;
 import static alvin.learn.lox.TokenType.PLUS;
 import static alvin.learn.lox.TokenType.PRINT;
+import static alvin.learn.lox.TokenType.QUESTION;
 import static alvin.learn.lox.TokenType.RETURN;
 import static alvin.learn.lox.TokenType.RIGHT_PAREN;
 import static alvin.learn.lox.TokenType.SEMICOLON;
@@ -68,12 +70,27 @@ class Parser {
   }
 
   private Expr equality() {
-    Expr expr = comparison();
+    Expr expr = ternary();
 
     while (match(BANG_EQUAL, EQUAL_EQUAL)) {
       Token operator = previous();
-      Expr right = comparison();
+      Expr right = ternary();
       expr = new Expr.Binary(expr, operator, right);
+    }
+
+    return expr;
+  }
+
+  private Expr ternary() {
+    Expr expr = comparison();
+
+    while (match(QUESTION)) {
+      Token question = previous();
+      Expr truly = comparison();
+      consume(COLON, "Expect ':' after expression.");
+      Token colon = previous();
+      Expr falsely = comparison();
+      expr = new Expr.Ternary(expr, question, truly, colon, falsely);
     }
 
     return expr;

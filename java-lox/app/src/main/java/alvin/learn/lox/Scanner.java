@@ -9,6 +9,7 @@ import static alvin.learn.lox.TokenType.AND;
 import static alvin.learn.lox.TokenType.BANG;
 import static alvin.learn.lox.TokenType.BANG_EQUAL;
 import static alvin.learn.lox.TokenType.CLASS;
+import static alvin.learn.lox.TokenType.COLON;
 import static alvin.learn.lox.TokenType.COMMA;
 import static alvin.learn.lox.TokenType.DOT;
 import static alvin.learn.lox.TokenType.ELSE;
@@ -32,6 +33,7 @@ import static alvin.learn.lox.TokenType.NUMBER;
 import static alvin.learn.lox.TokenType.OR;
 import static alvin.learn.lox.TokenType.PLUS;
 import static alvin.learn.lox.TokenType.PRINT;
+import static alvin.learn.lox.TokenType.QUESTION;
 import static alvin.learn.lox.TokenType.RETURN;
 import static alvin.learn.lox.TokenType.RIGHT_BRACE;
 import static alvin.learn.lox.TokenType.RIGHT_PAREN;
@@ -119,6 +121,12 @@ class Scanner {
         break;
       case '+':
         addToken(PLUS);
+        break;
+      case '?':
+        addToken(QUESTION);
+        break;
+      case ':':
+        addToken(COLON);
         break;
       case ';':
         addToken(SEMICOLON);

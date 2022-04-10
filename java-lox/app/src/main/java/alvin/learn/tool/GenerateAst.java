@@ -18,10 +18,11 @@ public class GenerateAst {
       outputDir,
       "Expr",
       Arrays.asList(
+        "Ternary  : Expr question, Token questionOp, Expr truly, Token colonOp, Expr falsely",
         "Binary   : Expr left, Token operator, Expr right",
+        "Unary    : Token operator, Expr right",
         "Grouping : Expr expression",
-        "Literal  : Object value",
-        "Unary    : Token operator, Expr right"
+        "Literal  : Object value"
       )
     );
   }

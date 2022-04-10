@@ -20,8 +20,18 @@ class AstPrinter implements Expr.Visitor<String> {
   }
 
   @Override
+  public String visitTernaryExpr(Expr.Ternary expr) {
+    return parenthesize(expr.questionOp.lexeme + expr.colonOp.lexeme, expr.question, expr.truly, expr.falsely);
+  }
+
+  @Override
   public String visitBinaryExpr(Expr.Binary expr) {
     return parenthesize(expr.operator.lexeme, expr.left, expr.right);
+  }
+
+  @Override
+  public String visitUnaryExpr(Expr.Unary expr) {
+    return parenthesize(expr.operator.lexeme, expr.right);
   }
 
   @Override
@@ -33,11 +43,6 @@ class AstPrinter implements Expr.Visitor<String> {
   public String visitLiteralExpr(Expr.Literal expr) {
     if (expr.value == null) return "nil";
     return expr.value.toString();
-  }
-
-  @Override
-  public String visitUnaryExpr(Expr.Unary expr) {
-    return parenthesize(expr.operator.lexeme, expr.right);
   }
 
   private String parenthesize(String name, Expr... exprs) {

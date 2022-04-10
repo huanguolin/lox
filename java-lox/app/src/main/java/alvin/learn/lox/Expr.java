@@ -4,14 +4,35 @@ import java.util.List;
 
 abstract class Expr {
   interface Visitor<R> {
+    R visitTernaryExpr(Ternary expr);
     R visitBinaryExpr(Binary expr);
+    R visitUnaryExpr(Unary expr);
     R visitGroupingExpr(Grouping expr);
     R visitLiteralExpr(Literal expr);
-    R visitUnaryExpr(Unary expr);
   }
 
   abstract <R> R accept(Visitor<R> visitor);
 
+  static class Ternary extends Expr {
+    Ternary(Expr question, Token questionOp, Expr truly, Token colonOp, Expr falsely) {
+      this.question = question;
+      this.questionOp = questionOp;
+      this.truly = truly;
+      this.colonOp = colonOp;
+      this.falsely = falsely;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitTernaryExpr(this);
+    }
+
+    final Expr question;
+    final Token questionOp;
+    final Expr truly;
+    final Token colonOp;
+    final Expr falsely;
+  }
   static class Binary extends Expr {
     Binary(Expr left, Token operator, Expr right) {
       this.left = left;
@@ -25,6 +46,20 @@ abstract class Expr {
     }
 
     final Expr left;
+    final Token operator;
+    final Expr right;
+  }
+  static class Unary extends Expr {
+    Unary(Token operator, Expr right) {
+      this.operator = operator;
+      this.right = right;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitUnaryExpr(this);
+    }
+
     final Token operator;
     final Expr right;
   }
@@ -51,19 +86,5 @@ abstract class Expr {
     }
 
     final Object value;
-  }
-  static class Unary extends Expr {
-    Unary(Token operator, Expr right) {
-      this.operator = operator;
-      this.right = right;
-    }
-
-    @Override
-    <R> R accept(Visitor<R> visitor) {
-      return visitor.visitUnaryExpr(this);
-    }
-
-    final Token operator;
-    final Expr right;
   }
 }
