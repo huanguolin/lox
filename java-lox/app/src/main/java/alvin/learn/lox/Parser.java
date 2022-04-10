@@ -5,6 +5,7 @@ import java.util.List;
 import static alvin.learn.lox.TokenType.BANG;
 import static alvin.learn.lox.TokenType.BANG_EQUAL;
 import static alvin.learn.lox.TokenType.CLASS;
+import static alvin.learn.lox.TokenType.COMMA;
 import static alvin.learn.lox.TokenType.EOF;
 import static alvin.learn.lox.TokenType.EQUAL_EQUAL;
 import static alvin.learn.lox.TokenType.FALSE;
@@ -51,7 +52,19 @@ class Parser {
   }
 
   private Expr expression() {
-    return equality();
+    return commaExpr();
+  }
+
+  private Expr commaExpr() {
+    Expr expr = equality();
+
+    while (match(COMMA)) {
+      Token operator = previous();
+      Expr right = equality();
+      expr = new Expr.Binary(expr, operator, right);
+    }
+
+    return expr;
   }
 
   private Expr equality() {
