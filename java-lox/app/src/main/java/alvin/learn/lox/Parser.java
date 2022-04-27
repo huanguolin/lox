@@ -23,6 +23,7 @@ import static alvin.learn.lox.TokenType.GREATER;
 import static alvin.learn.lox.TokenType.GREATER_EQUAL;
 import static alvin.learn.lox.TokenType.IDENTIFIER;
 import static alvin.learn.lox.TokenType.IF;
+import static alvin.learn.lox.TokenType.LEFT_BRACE;
 import static alvin.learn.lox.TokenType.LEFT_PAREN;
 import static alvin.learn.lox.TokenType.LESS;
 import static alvin.learn.lox.TokenType.LESS_EQUAL;
@@ -33,6 +34,7 @@ import static alvin.learn.lox.TokenType.PLUS;
 import static alvin.learn.lox.TokenType.PRINT;
 import static alvin.learn.lox.TokenType.QUESTION;
 import static alvin.learn.lox.TokenType.RETURN;
+import static alvin.learn.lox.TokenType.RIGHT_BRACE;
 import static alvin.learn.lox.TokenType.RIGHT_PAREN;
 import static alvin.learn.lox.TokenType.SEMICOLON;
 import static alvin.learn.lox.TokenType.SLASH;
@@ -102,8 +104,20 @@ class Parser {
 
   private Stmt statement() {
     if (match(PRINT)) return printStatement();
+    if (match(LEFT_BRACE)) return new Stmt.Block(block());
 
     return expressionStatement();
+  }
+
+  private List<Stmt> block() {
+    List<Stmt> statements = new ArrayList<>();
+
+    while (!check(RIGHT_BRACE) && !isAtEnd()) {
+      statements.add(declaration());
+    }
+
+    consume(RIGHT_BRACE, "Expect '}' after block.");
+    return statements;
   }
 
   private Stmt printStatement() {
