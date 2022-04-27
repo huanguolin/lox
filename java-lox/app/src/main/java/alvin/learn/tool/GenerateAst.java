@@ -20,6 +20,7 @@ public class GenerateAst {
       Arrays.asList(
         "Ternary  : Expr question, Token questionOp, Expr truly, Token colonOp, Expr falsely",
         "Binary   : Expr left, Token operator, Expr right",
+        "Assign   : Token name, Expr value",
         "Unary    : Token operator, Expr right",
         "Grouping : Expr expression",
         "Literal  : Object value",
