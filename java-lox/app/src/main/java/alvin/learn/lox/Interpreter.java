@@ -155,7 +155,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
   @Override
   public Object visitUnaryExpr(Expr.Unary expr) {
-    Object right = evaluate(expr);
+    Object right = evaluate(expr.right);
 
     switch (expr.operator.type) {
       case BANG:
