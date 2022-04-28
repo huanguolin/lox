@@ -13,6 +13,7 @@ import static alvin.learn.lox.TokenType.BANG_EQUAL;
 import static alvin.learn.lox.TokenType.CLASS;
 import static alvin.learn.lox.TokenType.COLON;
 import static alvin.learn.lox.TokenType.COMMA;
+import static alvin.learn.lox.TokenType.ELSE;
 import static alvin.learn.lox.TokenType.EOF;
 import static alvin.learn.lox.TokenType.EQUAL;
 import static alvin.learn.lox.TokenType.EQUAL_EQUAL;
@@ -103,10 +104,25 @@ class Parser {
   }
 
   private Stmt statement() {
+    if (match(IF)) return ifStatement();
     if (match(PRINT)) return printStatement();
     if (match(LEFT_BRACE)) return new Stmt.Block(block());
 
     return expressionStatement();
+  }
+
+  private Stmt ifStatement() {
+    consume(LEFT_PAREN, "Expect '(' after if.");
+    Expr condition = expression();
+    consume(RIGHT_PAREN, "Expect ')' after if condition.");
+    Stmt thenBranch = statement();
+
+    if (match(ELSE)) {
+      Stmt elseBranch = statement();
+      return new Stmt.If(condition, thenBranch, elseBranch);
+    } else {
+      return new Stmt.If(condition, thenBranch, null);
+    }
   }
 
   private List<Stmt> block() {

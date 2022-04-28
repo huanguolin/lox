@@ -83,6 +83,14 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     return null;
   }
 
+  @Override
+  public Void visitIfStmt(Stmt.If stmt) {
+    boolean isTrue = isTruthy(evaluate(stmt.condition));
+    if (isTrue) execute(stmt.thenBranch);
+    else if (stmt.elseBranch != null) execute(stmt.elseBranch);
+    return null;
+  }
+
   void executeBlock(List<Stmt> statements, Environment environment) {
     Environment previous = this.environment;
     try {
