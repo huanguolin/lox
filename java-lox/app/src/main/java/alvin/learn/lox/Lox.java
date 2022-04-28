@@ -38,6 +38,9 @@ public class Lox {
   }
 
   private static void runPrompt() throws IOException {
+    // enable print expr result
+    interpreter.setPrintExprResult(true);
+
     InputStreamReader input = new InputStreamReader(System.in);
     BufferedReader reader = new BufferedReader(input);
 

@@ -5,6 +5,15 @@ import java.util.List;
 class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
   private Environment environment = new Environment();
+  private boolean printExprResult = false;
+
+  public boolean isPrintExprResult() {
+    return printExprResult;
+  }
+
+  public void setPrintExprResult(boolean printExprResult) {
+    this.printExprResult = printExprResult;
+  }
 
   void interpret(List<Stmt> statements) {
     try {
@@ -36,7 +45,10 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
   @Override
   public Void visitExpressionStmt(Stmt.Expression stmt) {
-    evaluate(stmt.expression);
+    Object value = evaluate(stmt.expression);
+    if (printExprResult) {
+      System.out.println(stringify(value));
+    }
     return null;
   }
 
