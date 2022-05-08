@@ -93,10 +93,11 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
   @Override
   public Void visitIfStmt(Stmt.If stmt) {
-    boolean isTrue = isTruthy(evaluate(stmt.condition));
-    if (isTrue) execute(stmt.thenBranch); else if (
-      stmt.elseBranch != null
-    ) execute(stmt.elseBranch);
+    if (isTruthy(evaluate(stmt.condition))) {
+      execute(stmt.thenBranch);
+    } else if (stmt.elseBranch != null) {
+      execute(stmt.elseBranch);
+    }
     return null;
   }
 
