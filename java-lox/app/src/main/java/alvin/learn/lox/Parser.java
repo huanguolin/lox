@@ -165,7 +165,7 @@ class Parser {
   }
 
   private Expr assignment() {
-    Expr expr = equality();
+    Expr expr = ternary();
 
     if (match(EQUAL)) {
       Token equals = previous();
@@ -182,28 +182,28 @@ class Parser {
     return expr;
   }
 
-  private Expr equality() {
-    Expr expr = ternary();
+  private Expr ternary() {
+    Expr expr = equality();
 
-    while (match(BANG_EQUAL, EQUAL_EQUAL)) {
-      Token operator = previous();
-      Expr right = ternary();
-      expr = new Expr.Binary(expr, operator, right);
+    while (match(QUESTION)) {
+      Token question = previous();
+      Expr truly = equality();
+      consume(COLON, "Expect ':' after expression.");
+      Token colon = previous();
+      Expr falsely = equality();
+      expr = new Expr.Ternary(expr, question, truly, colon, falsely);
     }
 
     return expr;
   }
 
-  private Expr ternary() {
+  private Expr equality() {
     Expr expr = comparison();
 
-    while (match(QUESTION)) {
-      Token question = previous();
-      Expr truly = comparison();
-      consume(COLON, "Expect ':' after expression.");
-      Token colon = previous();
-      Expr falsely = comparison();
-      expr = new Expr.Ternary(expr, question, truly, colon, falsely);
+    while (match(BANG_EQUAL, EQUAL_EQUAL)) {
+      Token operator = previous();
+      Expr right = comparison();
+      expr = new Expr.Binary(expr, operator, right);
     }
 
     return expr;
