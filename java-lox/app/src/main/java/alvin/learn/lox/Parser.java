@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static alvin.learn.lox.TokenType.AND;
 import static alvin.learn.lox.TokenType.BANG;
 import static alvin.learn.lox.TokenType.BANG_EQUAL;
 import static alvin.learn.lox.TokenType.CLASS;
@@ -31,6 +32,7 @@ import static alvin.learn.lox.TokenType.LESS_EQUAL;
 import static alvin.learn.lox.TokenType.MINUS;
 import static alvin.learn.lox.TokenType.NIL;
 import static alvin.learn.lox.TokenType.NUMBER;
+import static alvin.learn.lox.TokenType.OR;
 import static alvin.learn.lox.TokenType.PLUS;
 import static alvin.learn.lox.TokenType.PRINT;
 import static alvin.learn.lox.TokenType.QUESTION;
@@ -183,15 +185,39 @@ class Parser {
   }
 
   private Expr ternary() {
-    Expr expr = equality();
+    Expr expr = or();
 
     while (match(QUESTION)) {
       Token question = previous();
-      Expr truly = equality();
+      Expr truly = or();
       consume(COLON, "Expect ':' after expression.");
       Token colon = previous();
-      Expr falsely = equality();
+      Expr falsely = or();
       expr = new Expr.Ternary(expr, question, truly, colon, falsely);
+    }
+
+    return expr;
+  }
+
+  private Expr or() {
+    Expr expr = and();
+
+    while (match(OR)) {
+      Token operator = previous();
+      Expr right = and();
+      expr = new Expr.Logical(expr, operator, right);
+    }
+
+    return expr;
+  }
+
+  private Expr and() {
+    Expr expr = equality();
+
+    while (match(AND)) {
+      Token operator = previous();
+      Expr right = equality();
+      expr = new Expr.Logical(expr, operator, right);
     }
 
     return expr;

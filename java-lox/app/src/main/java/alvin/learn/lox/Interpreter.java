@@ -86,8 +86,9 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
   @Override
   public Void visitIfStmt(Stmt.If stmt) {
     boolean isTrue = isTruthy(evaluate(stmt.condition));
-    if (isTrue) execute(stmt.thenBranch);
-    else if (stmt.elseBranch != null) execute(stmt.elseBranch);
+    if (isTrue) execute(stmt.thenBranch); else if (
+      stmt.elseBranch != null
+    ) execute(stmt.elseBranch);
     return null;
   }
 
@@ -119,6 +120,19 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     Object truly = evaluate(expr.truly);
     Object falsely = evaluate(expr.falsely);
     return isTruthy(question) ? truly : falsely;
+  }
+
+  @Override
+  public Object visitLogicalExpr(Expr.Logical expr) {
+    Object left = evaluate(expr.left);
+
+    if (expr.operator.type == TokenType.OR) {
+      if (isTruthy(left)) return left;
+    } else {
+      if (!isTruthy(left)) return left;
+    }
+
+    return evaluate(expr.right);
   }
 
   @Override
