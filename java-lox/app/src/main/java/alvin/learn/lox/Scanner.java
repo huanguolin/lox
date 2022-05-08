@@ -8,6 +8,7 @@ import java.util.Map;
 import static alvin.learn.lox.TokenType.AND;
 import static alvin.learn.lox.TokenType.BANG;
 import static alvin.learn.lox.TokenType.BANG_EQUAL;
+import static alvin.learn.lox.TokenType.BREAK;
 import static alvin.learn.lox.TokenType.CLASS;
 import static alvin.learn.lox.TokenType.COLON;
 import static alvin.learn.lox.TokenType.COMMA;
@@ -74,6 +75,7 @@ class Scanner {
     keywords.put("true", TRUE);
     keywords.put("var", VAR);
     keywords.put("while", WHILE);
+    keywords.put("break", BREAK);
   }
 
   public Scanner(String source) {

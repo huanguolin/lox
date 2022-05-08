@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 import static alvin.learn.lox.TokenType.AND;
 import static alvin.learn.lox.TokenType.BANG;
 import static alvin.learn.lox.TokenType.BANG_EQUAL;
+import static alvin.learn.lox.TokenType.BREAK;
 import static alvin.learn.lox.TokenType.CLASS;
 import static alvin.learn.lox.TokenType.COLON;
 import static alvin.learn.lox.TokenType.COMMA;
@@ -69,6 +70,7 @@ class Parser {
 
   private final List<Token> tokens;
   private int current = 0;
+  private int loopDeep = 0;
 
   Parser(List<Token> tokens) {
     this.tokens = tokens;
@@ -109,6 +111,7 @@ class Parser {
     if (match(IF)) return ifStatement();
     if (match(WHILE)) return whileStatement();
     if (match(FOR)) return forStatement();
+    if (match(BREAK)) return breakStatement();
     if (match(PRINT)) return printStatement();
     if (match(LEFT_BRACE)) return new Stmt.Block(block());
 
@@ -116,6 +119,8 @@ class Parser {
   }
 
   private Stmt forStatement() {
+    loopDeep++;
+
     consume(LEFT_PAREN, "Expect '(' after for.");
     Stmt initializer;
     if (match(SEMICOLON)) {
@@ -152,14 +157,21 @@ class Parser {
       body = new Stmt.Block(Arrays.asList(initializer, body));
     }
 
+    loopDeep--;
+
     return body;
   }
 
   private Stmt whileStatement() {
+    loopDeep++;
+
     consume(LEFT_PAREN, "Expect '(' after while.");
     Expr condition = expression();
     consume(RIGHT_PAREN, "Expect ')' after while condition.");
     Stmt body = statement();
+
+    loopDeep--;
+
     return new Stmt.While(condition, body);
   }
 
@@ -192,6 +204,16 @@ class Parser {
     Expr value = expression();
     consume(SEMICOLON, "Expect ';' after value.");
     return new Stmt.Print(value);
+  }
+
+  private Stmt breakStatement() {
+    if (loopDeep <= 0) {
+      throw error(previous(), "The break keyword cannot be used outside the loop.");
+    }
+
+    consume(SEMICOLON, "Expect ';' after break keyword.");
+
+    return new Stmt.Break();
   }
 
   private Stmt expressionStatement() {
