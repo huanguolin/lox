@@ -443,16 +443,22 @@ class Parser {
     List<Expr> arguments = new ArrayList<>();
     if (!check(RIGHT_PAREN)) {
       do {
-        // Why == ? not >= ? Because we just need one error.
+        // Why '==' not '>=' ? Because we just need one error.
         // Why limit max argument size to 254 ？Reserve one for 'this' for method.
         if (arguments.size() == 255) {
           error(peek(), "Can't have more than 255 arguments.");
         }
-        arguments.add(expression());
+
+        // Arguments should not be parsed as comma expressions.
+        arguments.add(notCommaExpr());
       } while (match(COMMA));
     }
     Token paren = consume(RIGHT_PAREN, "Expect ')' after arguments.");
     return new Expr.Call(expr, paren, arguments);
+  }
+
+  private Expr notCommaExpr() {
+    return assignment();
   }
 
   private Token consume(TokenType type, String message) {
