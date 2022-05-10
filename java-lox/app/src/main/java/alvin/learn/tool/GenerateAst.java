@@ -23,6 +23,7 @@ public class GenerateAst {
         "Logical  : Expr left, Token operator, Expr right",
         "Assign   : Token name, Expr value",
         "Unary    : Token operator, Expr right",
+        "Call     : Expr callee, Token paren, List<Expr> arguments",
         "Grouping : Expr expression",
         "Literal  : Object value",
         "Variable : Token name"
@@ -35,6 +36,8 @@ public class GenerateAst {
       Arrays.asList(
         "Block      : List<Stmt> statements",
         "Expression : Expr expression",
+        "Function   : Token name, List<Token> params, List<Stmt> body",
+        "Return     : Token keyword, Expr value",
         "If         : Expr condition, Stmt thenBranch, Stmt elseBranch",
         "Print      : Expr expression",
         "While      : Expr condition, Stmt body",
