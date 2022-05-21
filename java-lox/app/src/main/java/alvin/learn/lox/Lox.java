@@ -72,15 +72,23 @@ public class Lox {
     interpreter.interpret(statements);
   }
 
+  static void warn(Token token, String message) {
+    if (token.type == TokenType.EOF) {
+      reportWarn(token.line, " at end", message);
+    } else {
+      reportWarn(token.line, " at '" + token.lexeme + "'", message);
+    }
+  }
+
   static void error(int line, String message) {
-    report(line, "", message);
+    reportError(line, "", message);
   }
 
   static void error(Token token, String message) {
     if (token.type == TokenType.EOF) {
-      report(token.line, " at end", message);
+      reportError(token.line, " at end", message);
     } else {
-      report(token.line, " at '" + token.lexeme + "'", message);
+      reportError(token.line, " at '" + token.lexeme + "'", message);
     }
   }
 
@@ -91,8 +99,12 @@ public class Lox {
     hadRuntimeError = true;
   }
 
-  private static void report(int line, String where, String message) {
+  private static void reportError(int line, java.lang.String where, java.lang.String message) {
     System.err.println("[line " + line + "] Error" + where + ": " + message);
     hadError = true;
+  }
+
+  private static void reportWarn(int line, java.lang.String where, java.lang.String message) {
+    System.out.println("[line " + line + "] Warning" + where + ": " + message);
   }
 }
