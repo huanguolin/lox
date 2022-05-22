@@ -10,6 +10,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
   private final Interpreter interpreter;
   private final Stack<Map<String, VariableState>> scopes = new Stack<>();
   private FunctionType currentFunction = FunctionType.NONE;
+  private ClassType currentClass = ClassType.NONE;
 
   Resolver(Interpreter interpreter) {
     this.interpreter = interpreter;
@@ -20,6 +21,27 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     beginScope();
     resolve(stmt.statements);
     endScope();
+    return null;
+  }
+
+  @Override
+  public Void visitClassStmt(Stmt.Class stmt) {
+    ClassType enclosingClass = currentClass;
+    currentClass = ClassType.CLASS;
+
+    declare(stmt.name);
+    define(stmt.name);
+
+    beginScope();
+    scopes.peek().put("this", new VariableState());
+    for (Stmt.Function method : stmt.methods) {
+      FunctionType declaration = FunctionType.METHOD;
+      resolveFunction(method, declaration);
+    }
+    endScope();
+
+    currentClass = enclosingClass;
+
     return null;
   }
 
@@ -129,6 +151,24 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
   }
 
   @Override
+  public Void visitSetExpr(Expr.Set expr) {
+    resolve(expr.value);
+    resolve(expr.object);
+    return null;
+  }
+
+  @Override
+  public Void visitThisExpr(Expr.This expr) {
+    if (currentClass == ClassType.NONE) {
+      Lox.error(expr.keyword, "Can't use 'this' outside of a class.");
+      return null;
+    }
+
+    resolveLocal(expr, expr.keyword);
+    return null;
+  }
+
+  @Override
   public Void visitUnaryExpr(Expr.Unary expr) {
     resolve(expr.right);
     return null;
@@ -142,6 +182,12 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
       resolve(argument);
     }
 
+    return null;
+  }
+
+  @Override
+  public Void visitGetExpr(Expr.Get expr) {
+    resolve(expr.object);
     return null;
   }
 
@@ -177,7 +223,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
   private void endScope() {
     Map<String, VariableState> scope = scopes.pop();
     for (VariableState varState : scope.values()) {
-      if (!varState.hasUsed) {
+      if (varState.token != null && !varState.hasUsed) {
         Lox.warn(varState.token, "This local variable is never used.");
       }
     }
@@ -225,16 +271,24 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     currentFunction = enclosingFunction;
   }
 
+  private enum ClassType {
+    NONE,
+    CLASS,
+  }
+
   private enum FunctionType {
     NONE,
     FUNCTION,
+    METHOD,
   }
 
   private class VariableState {
 
-    Token token;
+    Token token = null; // when variable is this, token is null
     Boolean initialized = false;
     Boolean hasUsed = false;
+
+    VariableState() {}
 
     VariableState(Token t) {
       token = t;

@@ -15,6 +15,7 @@ import static alvin.learn.lox.TokenType.BREAK;
 import static alvin.learn.lox.TokenType.CLASS;
 import static alvin.learn.lox.TokenType.COLON;
 import static alvin.learn.lox.TokenType.COMMA;
+import static alvin.learn.lox.TokenType.DOT;
 import static alvin.learn.lox.TokenType.ELSE;
 import static alvin.learn.lox.TokenType.EOF;
 import static alvin.learn.lox.TokenType.EQUAL;
@@ -44,6 +45,7 @@ import static alvin.learn.lox.TokenType.SEMICOLON;
 import static alvin.learn.lox.TokenType.SLASH;
 import static alvin.learn.lox.TokenType.STAR;
 import static alvin.learn.lox.TokenType.STRING;
+import static alvin.learn.lox.TokenType.THIS;
 import static alvin.learn.lox.TokenType.TRUE;
 import static alvin.learn.lox.TokenType.VAR;
 import static alvin.learn.lox.TokenType.WHILE;
@@ -86,6 +88,7 @@ class Parser {
 
   private Stmt declaration() {
     try {
+      if (match(CLASS)) return classDeclaration();
       if (match(FUN)) return function("function");
       if (match(VAR)) return varDeclaration();
 
@@ -94,6 +97,20 @@ class Parser {
       synchronize();
       return null;
     }
+  }
+
+  private Stmt classDeclaration() {
+    Token name = consume(IDENTIFIER, "Expect class name.");
+    consume(LEFT_BRACE, "Expect '{' before class body.");
+
+    List<Stmt.Function> methods = new ArrayList<>();
+    while (!check(RIGHT_BRACE) && !isAtEnd()) {
+      methods.add(function("method"));
+    }
+
+    consume(RIGHT_BRACE, "Expect '}' after class body.");
+
+    return new Stmt.Class(name, methods);
   }
 
   private Stmt.Function function(String kind) {
@@ -107,8 +124,7 @@ class Parser {
           error(peek(), "Can't have more than 255 parameters.");
         }
 
-        parameters.add(
-            consume(IDENTIFIER, "Expect parameter name."));
+        parameters.add(consume(IDENTIFIER, "Expect parameter name."));
       } while (match(COMMA));
     }
     consume(RIGHT_PAREN, "Expect ')' after parameters.");
@@ -288,6 +304,9 @@ class Parser {
       if (expr instanceof Expr.Variable) {
         Token name = ((Expr.Variable) expr).name;
         return new Expr.Assign(name, value);
+      } else if (expr instanceof Expr.Get) {
+        Expr.Get get = (Expr.Get) expr;
+        return new Expr.Set(get.object, get.name, value);
       }
 
       error(equals, "Invalid assignment target.");
@@ -399,6 +418,9 @@ class Parser {
     while (true) {
       if (match(LEFT_PAREN)) {
         expr = finishCall(expr);
+      } else if (match(DOT)) {
+        Token name = consume(IDENTIFIER, "Expect property name after '.'.");
+        expr = new Expr.Get(expr, name);
       } else {
         break;
       }
@@ -416,6 +438,7 @@ class Parser {
       return new Expr.Literal(previous().literal);
     }
 
+    if (match(THIS)) return new Expr.This(previous());
     if (match(IDENTIFIER)) {
       return new Expr.Variable(previous());
     }
