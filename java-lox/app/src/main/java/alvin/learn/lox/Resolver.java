@@ -32,8 +32,22 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     declare(stmt.name);
     define(stmt.name);
 
+    if (stmt.superclass != null) {
+      if (stmt.name.lexeme.equals(stmt.superclass.name.lexeme)) {
+        Lox.error(stmt.superclass.name, "A class can't inherit from itself.");
+      }
+
+      currentClass = ClassType.SUBCLASS;
+      resolve(stmt.superclass);
+
+      beginScope();
+      scopes
+        .peek()
+        .put("super", new VariableState(stmt.superclass.name, true, true));
+    }
+
     beginScope();
-    scopes.peek().put("this", new VariableState());
+    scopes.peek().put("this", new VariableState(null, true, true));
     for (Stmt.Function method : stmt.methods) {
       FunctionType declaration = FunctionType.METHOD;
       if (method.name.lexeme.equals("init")) {
@@ -42,6 +56,9 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
       resolveFunction(method, declaration);
     }
     endScope();
+    if (stmt.superclass != null) {
+      endScope();
+    }
 
     currentClass = enclosingClass;
 
@@ -164,6 +181,21 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
   }
 
   @Override
+  public Void visitSuperExpr(Expr.Super expr) {
+    if (currentClass == ClassType.NONE) {
+      Lox.error(expr.keyword, "Can't use 'super' outside of a class.");
+    } else if (currentClass != ClassType.SUBCLASS) {
+      Lox.error(
+        expr.keyword,
+        "Can't use 'super' in a class with no superclass."
+      );
+    }
+
+    resolveLocal(expr, expr.keyword);
+    return null;
+  }
+
+  @Override
   public Void visitThisExpr(Expr.This expr) {
     if (currentClass == ClassType.NONE) {
       Lox.error(expr.keyword, "Can't use 'this' outside of a class.");
@@ -280,6 +312,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
   private enum ClassType {
     NONE,
     CLASS,
+    SUBCLASS,
   }
 
   private enum FunctionType {
@@ -292,13 +325,19 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
   private class VariableState {
 
     Token token = null; // when variable is this, token is null
-    Boolean initialized = false;
-    Boolean hasUsed = false;
+    boolean initialized = false;
+    boolean hasUsed = false;
 
     VariableState() {}
 
     VariableState(Token t) {
       token = t;
+    }
+
+    VariableState(Token token, boolean initialized, boolean hasUsed) {
+      this.token = token;
+      this.initialized = initialized;
+      this.hasUsed = hasUsed;
     }
   }
 }
