@@ -1,0 +1,4 @@
+*.exe
+*.exe.dSYM/
+main
+main.dSYM/
