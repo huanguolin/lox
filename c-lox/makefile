@@ -27,4 +27,4 @@ $(project_raw_OBJS):
 	$(CC) -c $(patsubst %.o,%.c,$@) -o $@
 
 clean:
-	rm -f app $(project_OBJS)
+	rm -f app $(project_OBJS) $(src_DIR)/*.o
