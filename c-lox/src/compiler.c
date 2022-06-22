@@ -164,6 +164,7 @@ static void number() {
 static void binary() {
   TokenType operatorType = parser.previous.type;
   ParseRule* rule = getRule(operatorType);
+  // Plus one to make high precedence.
   parsePrecedence((Precedence)(rule->precedence + 1));
 
   switch (operatorType) {
