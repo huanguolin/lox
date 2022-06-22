@@ -40,6 +40,16 @@ static Value peek(int distance) {
   return vm.stackTop[-1 - distance];
 }
 
+static bool toBool(Value value) {
+  if (IS_NIL(value)) {
+    return false;
+  } else if (IS_BOOL(value)) {
+    return AS_BOOL(value);
+  }
+
+  return true;
+}
+
 static InterpretResult run() {
 #define READ_BYTE() (*vm.ip++)
 #define READ_CONSTANT() (vm.chunk->constants.values[READ_BYTE()])
@@ -88,6 +98,9 @@ static InterpretResult run() {
       break;
     case OP_DIVIDE:
       BINARY_OP(NUMBER_VAL, /);
+      break;
+    case OP_NOT:
+      push(BOOL_VAL(!toBool(pop())));
       break;
     case OP_NEGATE:
       if (!IS_NUMBER(peek(0))) {
