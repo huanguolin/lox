@@ -24,7 +24,7 @@ copy: $(project_raw_OBJS)
 	@- mv $(project_raw_OBJS) $(build_DIR)
 
 $(project_raw_OBJS):
-	$(CC) -c $(patsubst %.o,%.c,$@) -o $@
+	$(CC) -g -o0 -c $(patsubst %.o,%.c,$@) -o $@
 
 clean:
 	rm -f app $(project_OBJS) $(src_DIR)/*.o
