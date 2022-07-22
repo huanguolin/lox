@@ -223,6 +223,7 @@ static ParseRule* getRule(TokenType type);
 static void parsePrecedence(Precedence precedence);
 static void statement();
 static void declaration();
+static void expression();
 
 static void beginScope() {
   current->scopeDepth++;
