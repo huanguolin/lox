@@ -258,6 +258,7 @@ static InterpretResult run() {
       if (!callValue(peek(argCount), argCount)) {
         return INTERPRET_RUNTIME_ERROR;
       }
+      // Here 'frame' is the called function frame.
       frame = &vm.frames[vm.frameCount - 1];
       break;
     }
@@ -271,6 +272,7 @@ static InterpretResult run() {
 
       vm.stackTop = frame->slots;
       push(result);
+      // Back to run caller chunk's code.
       frame = &vm.frames[vm.frameCount - 1];
       break;
     }
